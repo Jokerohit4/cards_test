@@ -15,5 +15,6 @@ class MyApp extends StatelessWidget {
         //   initialBinding: AuthBinding(),
         title: StringConstants.cards,
         home: HomeView(),
+        theme: ThemeData(fontFamily: 'Circular Std'),
       );
 }

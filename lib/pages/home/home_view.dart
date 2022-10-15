@@ -1,11 +1,21 @@
 import 'package:cards_test/app.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
-class HomeView extends StatelessWidget {
+class HomeView extends StatefulWidget {
   HomeView({Key? key}) : super(key: key);
+
+  @override
+  State<HomeView> createState() => _HomeViewState();
+}
+
+class _HomeViewState extends State<HomeView> {
   final List<Cards> cards = [];
 
-  List<BottomNavigationBarItem> _items = [
+  HomeController controller = Get.put(HomeController());
+
+  final List<BottomNavigationBarItem> _itemsNaviagtion = [
     BottomNavigationBarItem(
       icon: const Icon(
         Icons.home,
@@ -39,14 +49,21 @@ class HomeView extends StatelessWidget {
       String offer, String duration) {
     return Container(
       padding: EdgeInsets.zero,
+      margin: EdgeInsets.zero,
       decoration: BoxDecoration(
-          color: ColorsValue.primaryColor.withOpacity(0.04),
-          borderRadius: const BorderRadius.all(Radius.circular(12))),
+        color: ColorsValue.primaryColor.withOpacity(0.04),
+        borderRadius: const BorderRadius.all(Radius.circular(12)),
+      ),
       height: 180,
       width: 320,
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Image.asset(imageUrl),
+          Image.asset(
+            imageUrl,
+            height: 100,
+            fit: BoxFit.fitWidth,
+          ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 7, horizontal: 10),
             child: Row(
@@ -108,7 +125,7 @@ class HomeView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            StringConstants.johnJacob,
+            cardHolderName,
             style: const TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w500,
@@ -118,29 +135,29 @@ class HomeView extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(top: 10.0, bottom: 50),
             child: Image.network(
-              AssetConstants.hdfcLogo,
+              bankLogoUrl,
               width: 92,
             ),
           ),
           Text(
-            StringConstants.cardNo,
+            cardNo,
             style: const TextStyle(
-              color: ColorsValue.secondryColor,
+              color: ColorsValue.secondaryColor,
               fontWeight: FontWeight.w500,
               fontSize: 20,
             ),
           ),
           Text(
-            StringConstants.regaliaPlatinum,
+            cardType,
             style: const TextStyle(
-              color: ColorsValue.secondryColor,
+              color: ColorsValue.secondaryColor,
               fontWeight: FontWeight.w400,
               fontSize: 16,
             ),
           ),
           const SizedBox(height: 23),
           Image.network(
-            AssetConstants.masterCardLogo,
+            cardCompanyLogoUrl,
             width: 30,
           ),
         ],
@@ -152,7 +169,22 @@ class HomeView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(StringConstants.myCards),
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios,
+            color: ColorsValue.primaryColor,
+          ),
+          onPressed: () {},
+        ),
+        title: Text(
+          StringConstants.myCards,
+          style: const TextStyle(
+            fontSize: 20,
+            color: ColorsValue.primaryColor,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        backgroundColor: ColorsValue.backgroundColor,
       ),
       body: SafeArea(
         child: Padding(
@@ -160,9 +192,7 @@ class HomeView extends StatelessWidget {
             left: 20.0,
             top: 25.0,
           ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: ListView(
             children: [
               Text(
                 StringConstants.manageYourCards,
@@ -183,9 +213,9 @@ class HomeView extends StatelessWidget {
                   itemBuilder: (BuildContext context, int index) => card(
                       StringConstants.johnJacob,
                       AssetConstants.hdfcLogo,
-                      StringConstants.cardNo,
-                      StringConstants.regaliaPlatinum,
-                      AssetConstants.masterCardLogo),
+                      StringConstants.cardNos,
+                      AssetConstants.masterCardLogo,
+                      StringConstants.regaliaPlatinum),
                 ),
               ),
               const SizedBox(
@@ -208,7 +238,7 @@ class HomeView extends StatelessWidget {
                     height: 8,
                     decoration: const BoxDecoration(
                       shape: BoxShape.circle,
-                      color: ColorsValue.secondryColor,
+                      color: ColorsValue.secondaryColor,
                     ),
                   ),
                 ],
@@ -217,32 +247,96 @@ class HomeView extends StatelessWidget {
                 height: 15,
               ),
               rewardsCard(
-                  AssetConstants.loungeAccessImage,
-                  StringConstants.travelRewards,
-                  StringConstants.freePass,
-                  StringConstants.loungeAccess,
-                  StringConstants.duration),
+                AssetConstants.loungeAccessImage,
+                StringConstants.travelRewards,
+                StringConstants.freePass,
+                StringConstants.loungeAccess,
+                StringConstants.duration,
+              ),
+              GetBuilder<HomeController>(builder: (_) {
+                return Padding(
+                  padding: const EdgeInsets.only(top: 20, bottom: 30),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton2(
+                      isExpanded: true,
+                      hint: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              StringConstants.bankName,
+                              style: Styles.textButtonStyle,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      items: controller.banks
+                          .map(
+                            (item) => DropdownMenuItem<String>(
+                              value: item,
+                              child: Text(
+                                item,
+                                style: Styles.textButtonStyle,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          )
+                          .toList(),
+                      value: controller.select,
+                      onChanged: (value) {
+                        //controller.onChange(value);
+                        controller.update();
+                      },
+                      icon: const Icon(Icons.keyboard_arrow_down_outlined),
+                      iconSize: 25,
+                      iconEnabledColor: ColorsValue.highlightingColor,
+                      iconDisabledColor: ColorsValue.highlightingColor,
+                      buttonHeight: 42,
+                      buttonWidth: 319.97,
+                      buttonPadding: const EdgeInsets.only(left: 14, right: 14),
+                      buttonElevation: 2,
+                      buttonDecoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          color: ColorsValue.backgroundColor,
+                          boxShadow: const [
+                            BoxShadow(
+                              color: ColorsValue.shadow,
+                              blurRadius: 70.0,
+                            ),
+                          ]),
+                      itemHeight: 40,
+                      itemPadding: const EdgeInsets.only(left: 14, right: 14),
+                      dropdownMaxHeight: 200,
+                      dropdownWidth: 200,
+                      dropdownPadding: null,
+                      dropdownDecoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      dropdownElevation: 8,
+                      scrollbarRadius: const Radius.circular(40),
+                      scrollbarThickness: 6,
+                      scrollbarAlwaysShow: true,
+                      offset: const Offset(-20, 0),
+                    ),
+                  ),
+                );
+              }),
             ],
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: ColorsValue.highlightingColor,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        onPressed: () {},
-        label: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: Text(
-            StringConstants.addCard,
-            style: const TextStyle(fontSize: 16),
-          ),
-        ),
+      floatingActionButton: AddCardButton(
+        banks: controller.banks,
+        cardNames: controller.cardNames,
+        bankNameValue: controller.bankNameValue,
+        cardNameValue: controller.cardNameValue,
       ),
       bottomNavigationBar: BottomNavigationBar(
-        elevation: 3,
-        items: _items,
+        items: _itemsNaviagtion,
+        selectedItemColor: ColorsValue.highlightingColor,
+        unselectedItemColor: ColorsValue.secondaryColor,
+        showSelectedLabels: true,
+        showUnselectedLabels: true,
       ),
     );
   }
