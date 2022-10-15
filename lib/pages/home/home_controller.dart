@@ -23,9 +23,10 @@ class HomeController extends GetxController {
   ];
 
   onChange(value, int i) {
-    if (i == 1)
+    if (i == 1) {
       bankNameValue = value;
-    else
+    } else {
       cardNameValue = value;
+    }
   }
 }
