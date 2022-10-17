@@ -20,8 +20,7 @@ class AppPages {
     GetPage<HomeView>(
       name: Routes.homeScreen,
       transitionDuration: transitionDuration,
-      page: () => HomeView(),
-      // binding: WorkersBinding(),
+      page: () => const HomeView(),
       transition: Transition.fadeIn,
     ),
   ];

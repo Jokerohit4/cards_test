@@ -7,7 +7,7 @@
 abstract class AssetConstants {
   //icons
   static const String cardsIcon = 'assets/icons/cards icon.png';
-  static const String editCardIcon = 'assets/icons/edit card.png';
+  static const String editCardIcon = 'assets/icons/edit card icon.png';
   static const String friendsIcon = 'assets/icons/friends icon.png';
   static const String requestIcon = 'assets/icons/request icon.png';
 

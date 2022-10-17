@@ -4,17 +4,19 @@ import 'package:get/get.dart';
 import 'app.dart';
 
 void main() async {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
+//notes in readME
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) => GetMaterialApp(
         debugShowCheckedModeBanner: false,
         getPages: AppPages.pages,
-        //   initialBinding: AuthBinding(),
         title: StringConstants.cards,
-        home: HomeView(),
+        home: const HomeView(),
         theme: ThemeData(fontFamily: 'Circular Std'),
       );
 }

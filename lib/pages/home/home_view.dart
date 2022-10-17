@@ -1,21 +1,24 @@
 import 'package:cards_test/app.dart';
-import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+//the starting page of the app
 class HomeView extends StatefulWidget {
-  HomeView({Key? key}) : super(key: key);
+  const HomeView({Key? key}) : super(key: key);
 
   @override
   State<HomeView> createState() => _HomeViewState();
 }
 
 class _HomeViewState extends State<HomeView> {
-  final List<Cards> cards = [];
+  //to notify for updates
+  int forUpdates = 0;
 
+  //controller
   HomeController controller = Get.put(HomeController());
 
-  final List<BottomNavigationBarItem> _itemsNaviagtion = [
+  //pages to go to
+  final List<BottomNavigationBarItem> _itemsNavigation = [
     BottomNavigationBarItem(
       icon: const Icon(
         Icons.home,
@@ -45,7 +48,7 @@ class _HomeViewState extends State<HomeView> {
   ];
 
   ////rewards Card UI
-  Widget rewardsCard(String imageUrl, String rewardName, String cardCost,
+  Widget rewardsCard(String imageUrl, String rewardName, String offerPercent,
       String offer, String duration) {
     return Container(
       padding: EdgeInsets.zero,
@@ -77,7 +80,7 @@ class _HomeViewState extends State<HomeView> {
                   ),
                 ),
                 Text(
-                  cardCost,
+                  offerPercent,
                   style: const TextStyle(
                     color: ColorsValue.highlightingColor,
                     fontSize: 14,
@@ -103,13 +106,14 @@ class _HomeViewState extends State<HomeView> {
   }
 
   ////card UI
-  Widget card(String cardHolderName, String bankLogoUrl, String cardNo,
+  Widget card(String cardHolderName, String bankLogo, String cardNo,
       String cardCompanyLogoUrl, String cardType) {
     return Container(
       padding: const EdgeInsets.only(
         left: 20,
         top: 35,
         bottom: 20,
+        right: 30,
       ),
       margin: const EdgeInsets.only(right: 30),
       decoration: BoxDecoration(
@@ -119,26 +123,35 @@ class _HomeViewState extends State<HomeView> {
           ),
           borderRadius: const BorderRadius.all(Radius.circular(12))),
       height: 248,
-      width: 235,
+      width: 200,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            cardHolderName,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w500,
-              letterSpacing: 0.5,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                cardHolderName,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 0.5,
+                ),
+              ),
+              Image.asset(
+                AssetConstants.editCardIcon,
+              ),
+            ],
           ),
           Padding(
-            padding: const EdgeInsets.only(top: 10.0, bottom: 50),
-            child: Image.network(
-              bankLogoUrl,
-              width: 92,
-            ),
-          ),
+              padding: const EdgeInsets.only(top: 10.0, bottom: 50),
+              child: bankLogo == AssetConstants.hdfcLogo
+                  ? Image.network(
+                      bankLogo,
+                      width: 92,
+                    )
+                  : Text(bankLogo)),
           Text(
             cardNo,
             style: const TextStyle(
@@ -192,147 +205,114 @@ class _HomeViewState extends State<HomeView> {
             left: 20.0,
             top: 25.0,
           ),
-          child: ListView(
-            children: [
-              Text(
-                StringConstants.manageYourCards,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w500,
-                  fontSize: 16,
+          child: GetBuilder<HomeController>(builder: (_) {
+            return ListView(
+              children: [
+                Text(
+                  StringConstants.manageYourCards,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 16,
+                  ),
                 ),
-              ),
-              const SizedBox(
-                height: 35,
-              ),
-              SizedBox(
-                width: double.infinity,
-                height: 250,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: 3,
-                  itemBuilder: (BuildContext context, int index) => card(
-                      StringConstants.johnJacob,
-                      AssetConstants.hdfcLogo,
-                      StringConstants.cardNos,
-                      AssetConstants.masterCardLogo,
-                      StringConstants.regaliaPlatinum),
+                const SizedBox(
+                  height: 35,
                 ),
-              ),
-              const SizedBox(
-                height: 30,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    margin: const EdgeInsets.all(5),
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: ColorsValue.primaryColor,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: ColorsValue.secondaryColor,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(
-                height: 15,
-              ),
-              rewardsCard(
-                AssetConstants.loungeAccessImage,
-                StringConstants.travelRewards,
-                StringConstants.freePass,
-                StringConstants.loungeAccess,
-                StringConstants.duration,
-              ),
-              GetBuilder<HomeController>(builder: (_) {
-                return Padding(
-                  padding: const EdgeInsets.only(top: 20, bottom: 30),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton2(
-                      isExpanded: true,
-                      hint: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              StringConstants.bankName,
-                              style: Styles.textButtonStyle,
-                              overflow: TextOverflow.ellipsis,
+                SizedBox(
+                    width: double.infinity,
+                    height: 250,
+                    child: controller.cardData.isNotEmpty
+                        ? PageView.builder(
+                            onPageChanged: (index) {
+                              forUpdates = index;
+                              controller.update();
+                            },
+                            scrollDirection: Axis.horizontal,
+                            itemCount: controller.cardData.length,
+                            itemBuilder: (BuildContext context, int index) {
+                              return card(
+                                  StringConstants.johnJacob,
+                                  controller.cardData[index].bankName,
+                                  controller.cardData[index].cardNumber,
+                                  AssetConstants.masterCardLogo,
+                                  controller.cardData[index].cardName);
+                            })
+                        : card(
+                            StringConstants.johnJacob,
+                            AssetConstants.hdfcLogo,
+                            StringConstants.cardNos,
+                            AssetConstants.masterCardLogo,
+                            StringConstants.regaliaPlatinum)),
+                const SizedBox(
+                  height: 30,
+                ),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                      horizontal: MediaQuery.of(context).size.width / 2.8),
+                  child: SizedBox(
+                    width: 400,
+                    height: 18,
+                    child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: controller.cardData.isNotEmpty
+                            ? controller.cardData.length
+                            : 1,
+                        itemBuilder: (context, index) {
+                          return Container(
+                            margin: const EdgeInsets.all(5),
+                            width: 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: (forUpdates == index)
+                                  ? ColorsValue.primaryColor
+                                  : ColorsValue.secondaryColor,
+                              shape: BoxShape.circle,
                             ),
-                          ),
-                        ],
-                      ),
-                      items: controller.banks
-                          .map(
-                            (item) => DropdownMenuItem<String>(
-                              value: item,
-                              child: Text(
-                                item,
-                                style: Styles.textButtonStyle,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          )
-                          .toList(),
-                      value: controller.select,
-                      onChanged: (value) {
-                        //controller.onChange(value);
-                        controller.update();
-                      },
-                      icon: const Icon(Icons.keyboard_arrow_down_outlined),
-                      iconSize: 25,
-                      iconEnabledColor: ColorsValue.highlightingColor,
-                      iconDisabledColor: ColorsValue.highlightingColor,
-                      buttonHeight: 42,
-                      buttonWidth: 319.97,
-                      buttonPadding: const EdgeInsets.only(left: 14, right: 14),
-                      buttonElevation: 2,
-                      buttonDecoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          color: ColorsValue.backgroundColor,
-                          boxShadow: const [
-                            BoxShadow(
-                              color: ColorsValue.shadow,
-                              blurRadius: 70.0,
-                            ),
-                          ]),
-                      itemHeight: 40,
-                      itemPadding: const EdgeInsets.only(left: 14, right: 14),
-                      dropdownMaxHeight: 200,
-                      dropdownWidth: 200,
-                      dropdownPadding: null,
-                      dropdownDecoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      dropdownElevation: 8,
-                      scrollbarRadius: const Radius.circular(40),
-                      scrollbarThickness: 6,
-                      scrollbarAlwaysShow: true,
-                      offset: const Offset(-20, 0),
-                    ),
+                          );
+                        }),
                   ),
-                );
-              }),
-            ],
-          ),
+                ),
+                const SizedBox(
+                  height: 15,
+                ),
+                rewardsCard(
+                  AssetConstants.loungeAccessImage,
+                  StringConstants.travelRewards,
+                  controller.cardData.isEmpty
+                      ? StringConstants.freePass
+                      : controller.cardData[forUpdates].discounts.offer1,
+                  StringConstants.loungeAccess,
+                  StringConstants.duration,
+                ),
+                rewardsCard(
+                  AssetConstants.electronicsImage,
+                  StringConstants.travelRewards,
+                  controller.cardData.isEmpty
+                      ? StringConstants.freePass
+                      : controller.cardData[forUpdates].discounts.offer2,
+                  StringConstants.loungeAccess,
+                  StringConstants.duration,
+                ),
+                rewardsCard(
+                  AssetConstants.electronicsImage,
+                  StringConstants.travelRewards,
+                  controller.cardData.isEmpty
+                      ? StringConstants.freePass
+                      : controller.cardData[forUpdates].discounts.offer3,
+                  StringConstants.loungeAccess,
+                  StringConstants.duration,
+                ),
+              ],
+            );
+          }),
         ),
       ),
       floatingActionButton: AddCardButton(
         banks: controller.banks,
         cardNames: controller.cardNames,
-        bankNameValue: controller.bankNameValue,
-        cardNameValue: controller.cardNameValue,
       ),
       bottomNavigationBar: BottomNavigationBar(
-        items: _itemsNaviagtion,
+        items: _itemsNavigation,
         selectedItemColor: ColorsValue.highlightingColor,
         unselectedItemColor: ColorsValue.secondaryColor,
         showSelectedLabels: true,

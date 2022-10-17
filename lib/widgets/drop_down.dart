@@ -4,16 +4,16 @@ import 'package:get/get.dart';
 
 import '../app.dart';
 
+//dropdown button ui that allows to choose banks and cards
+
 class DropDown extends StatelessWidget {
   DropDown({
     Key? key,
     required this.hintText,
     required this.items,
-    required this.selectedValue,
   }) : super(key: key);
   final String hintText;
   final List items;
-  final String? selectedValue;
   HomeController controller = Get.put(HomeController());
   @override
   Widget build(BuildContext context) {
